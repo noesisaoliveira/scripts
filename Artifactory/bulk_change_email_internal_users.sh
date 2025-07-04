@@ -8,6 +8,8 @@ API_PASSWORD="password"
 OLD_EMAIL="Old_email_to_be_changed"
 NEW_EMAIL="New_email_to_be_changed"
 
+LOG_FILE="update_email_log_$(date +%Y%m%d_%H%M%S).log"
+
 # Obter os utilizadores do Artifactory
 echo "A obter os utilizadores..."
 users=$(curl -s -u "$API_USER:$API_PASSWORD" "$ARTIFACTORY_URL/api/security/users")
@@ -34,8 +36,10 @@ echo "$users" | jq -r '.[].name' | while read -r username; do
 
         if [[ "$response" == "200" ]]; then
             echo "Sucesso na atualização do email em: $username"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Atualizado: $username" >> "$LOG_FILE"
         else
             echo "Falha na atualização do email em: $username (HTTP $response)"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $response)" >> "$LOG_FILE"
         fi
     fi
 done
