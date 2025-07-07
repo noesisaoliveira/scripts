@@ -23,6 +23,13 @@ LOG_FILE="update_email_log_$(date +%Y%m%d_%H%M%S).log"
 echo "A obter os utilizadores..."
 users=$(curl -s -u "$API_USER:$API_PASSWORD" "$ARTIFACTORY_URL/api/security/users")
 
+# Verifica se a chamada à API teve sucesso
+if [[ -z "$users" || "$users" == "[]" ]]; then
+    echo "Unable to reach Artifactory API URL, please check if Artifactory is available"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Unable to reach Artifactory API URL, please check if Artifactory is available" >> "$LOG_FILE"
+    exit 1
+fi
+
 # Ciclo entre cada user
 echo "$users" | jq -r '.[].name' | while read -r username; do
     # Obter os detalhes do user
