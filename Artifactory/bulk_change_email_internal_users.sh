@@ -3,6 +3,12 @@
 # Configuração
 ARTIFACTORY_URL="https://ARTIFACTORY_URL/artifactory"
 
+# Verificar argumento
+if [[ "$1" != "-r" && "$1" != "-c" ]]; then
+    echo "Please execute this script with one option. -r (Run script and apply changes in bulk), -c (Check execution, creates a log with changes but doesn’t change them directly)"
+    exit 1
+fi
+
 # Pergunta o utilizador e a password da API
 read -p "Introduza o utilizador da API: " API_USER
 read -s -p "Introduza a password da API: " API_PASSWORD
@@ -25,24 +31,31 @@ echo "$users" | jq -r '.[].name' | while read -r username; do
     # Extração do email atual
     current_email=$(echo "$user_json" | jq -r '.email // empty')
 
-    # Se existir match com o mail configurado, alterar o email para o novo mail
+    # Se existir match com o mail configurado, processar
     if [[ "$current_email" == "$OLD_EMAIL" ]]; then
-        echo "A atualizar o email..."
+        echo "Encontrado utilizador para atualizar: $username"
 
-        updated_json=$(echo "$user_json" | jq --arg new_email "$NEW_EMAIL" '.email = $new_email')
+        if [[ "$1" == "-r" ]]; then
+            echo "A atualizar o email..."
 
-        # Enviar pedido PUT com JSON atualizado
-        response=$(curl -s -o /dev/null -w "%{http_code}" -u "$API_USER:$API_PASSWORD" \
-            -H "Content-Type: application/json" \
-            -X PUT "$ARTIFACTORY_URL/api/security/users/$username" \
-            -d "$updated_json")
+            updated_json=$(echo "$user_json" | jq --arg new_email "$NEW_EMAIL" '.email = $new_email')
 
-        if [[ "$response" == "200" ]]; then
-            echo "Sucesso na atualização do email em: $username"
-            echo "$(date '+%Y-%m-%d %H:%M:%S') - Atualizado: $username" >> "$LOG_FILE"
+            # Enviar pedido PUT com JSON atualizado
+            response=$(curl -s -o /dev/null -w "%{http_code}" -u "$API_USER:$API_PASSWORD" \
+                -H "Content-Type: application/json" \
+                -X PUT "$ARTIFACTORY_URL/api/security/users/$username" \
+                -d "$updated_json")
+
+            if [[ "$response" == "200" ]]; then
+                echo "Sucesso na atualização do email : $username"
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - Atualizado: $username" >> "$LOG_FILE"
+            else
+                echo "Falha na atualização do email : $username (HTTP $response)"
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $response)" >> "$LOG_FILE"
+            fi
         else
-            echo "Falha na atualização do email em: $username (HTTP $response)"
-            echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $response)" >> "$LOG_FILE"
+            echo "Modo de verificação: o email do user $username vai ser alterado se executar o script com a flag -r."
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Verificação: $username (email atual: $current_email)" >> "$LOG_FILE"
         fi
     fi
 done
