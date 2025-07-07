@@ -2,8 +2,11 @@
 
 # Configuração
 ARTIFACTORY_URL="https://ARTIFACTORY_URL/artifactory"
-API_USER="admin"
-API_PASSWORD="password"
+
+# Pergunta o utilizador e a password da API
+read -p "Introduza o utilizador da API: " API_USER
+read -s -p "Introduza a password da API: " API_PASSWORD
+echo
 
 OLD_EMAIL="Old_email_to_be_changed"
 NEW_EMAIL="New_email_to_be_changed"
