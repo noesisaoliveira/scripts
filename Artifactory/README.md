@@ -2,13 +2,22 @@
 bulk_change_email_users.sh
 
 # What it does?
-This script is intentioned to bulk update the email on internal users for Jfrog Artifactory
-You configure the old email and the new email, and the script goes into Artifactory API to retrive the users and update them with the new email.
-It also create a log file with all the updates and failures. 
+Este script tem como objetivo atualizar em massa o e-mail de utilizadores internos do Jfrog Artifactory.
+É necessário configurar o e-mail antigo e o novo, o script acede por API do Artifactory para verificar os utilizadores com o email antigo a alterar e atualiza-los com o novo e-mail.
+Este script também cria um arquivo de log com todas as atualizações e falhas.
 
 
 # Notas para a execução deste script
 Validar se o jq está instalado, caso não esteja é necesário instalar
+
+Editar o script e na área de configuração é necessário introduzir os seguintes dados:
+        # Configuração
+        ARTIFACTORY_URL="https://ARTIFACTORY_URL/artifactory"
+        OLD_EMAIL="Old_email_to_be_changed"
+        NEW_EMAIL="New_email_to_be_changed"
+
+Para executar o script é necessário indicar uma opção (-c para validar os users que vão ser alterados de acordo com o old email introduzido no script, é criado um logfile com a lista de users que seriam alterados ou -r para executar o script e alterar em massa todos os users encontrados com o old email);
+Quando o script é executado, é perguntado ao utilizador o utilizador Artifactory com permissões para alteração dos emails e a respectiva password.
 
 # Garantir permissões de execução neste script
 chmod +x bulk_change_email_internal_users.sh
