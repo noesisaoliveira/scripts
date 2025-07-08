@@ -11,6 +11,7 @@ Este script também cria um arquivo de log com todas as atualizações e falhas.
 Validar se o jq está instalado, caso não esteja é necesário instalar
 
 Editar o script e na área de configuração é necessário introduzir os seguintes dados:
+        
         Configuração:
         ARTIFACTORY_URL="https://ARTIFACTORY_URL/artifactory"
         OLD_EMAIL="Old_email_to_be_changed"
