@@ -17,7 +17,11 @@ Editar o script e na área de configuração é necessário introduzir os seguin
         OLD_EMAIL="Old_email_to_be_changed"
         NEW_EMAIL="New_email_to_be_changed"
 
-Para executar o script é necessário indicar uma opção (-c para validar os users que vão ser alterados de acordo com o old email introduzido no script, é criado um logfile com a lista de users que seriam alterados ou -r para executar o script e alterar em massa todos os users encontrados com o old email);
+Para executar o script é necessário indicar uma opção:
+        -c para validar os users que vão ser alterados de acordo com o old email introduzido no script, é criado um logfile com a lista de users que seriam alterados;
+        -r para executar o script e alterar em massa todos os users encontrados com o old email;
+        -1 para executar o script e alterar apenas o primeiro match com o old_email, depois para a atualização.
+        
 Quando o script é executado, é perguntado ao utilizador o utilizador Artifactory com permissões para alteração dos emails e a respectiva password.
 
 # Garantir permissões de execução neste script

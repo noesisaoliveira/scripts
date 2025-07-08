@@ -4,8 +4,8 @@
 ARTIFACTORY_URL="https://ARTIFACTORY_URL/artifactory"
 
 # Verificar argumento
-if [[ "$1" != "-r" && "$1" != "-c" ]]; then
-    echo "Please execute this script with one option. -r (Run script and apply changes in bulk), -c (Check execution, creates a log with changes but doesn’t change them directly)"
+if [[ "$1" != "-r" && "$1" != "-c" && "$1" != "-1" ]]; then
+    echo "Please execute this script with one option. -r (Run script and apply changes in bulk), -c (Check execution, creates a log with changes but doesn’t change them directly), -1 (Change only the first matched user and stop)"
     exit 1
 fi
 
@@ -42,7 +42,7 @@ echo "$users" | jq -r '.[].name' | while read -r username; do
     if [[ "$current_email" == "$OLD_EMAIL" ]]; then
         echo "Encontrado utilizador para atualizar: $username"
 
-        if [[ "$1" == "-r" ]]; then
+        if [[ "$1" == "-r" || "$1" == "-1" ]]; then
             echo "A atualizar o email..."
 
             updated_json=$(echo "$user_json" | jq --arg new_email "$NEW_EMAIL" '.email = $new_email')
@@ -60,9 +60,15 @@ echo "$users" | jq -r '.[].name' | while read -r username; do
                 echo "Falha na atualização do email : $username (HTTP $response)"
                 echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $response)" >> "$LOG_FILE"
             fi
-        else
+        elif [[ "$1" == "-c" ]]; then
             echo "Modo de verificação: o email do user $username vai ser alterado se executar o script com a flag -r."
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Verificação: $username (email atual: $current_email)" >> "$LOG_FILE"
+        fi
+
+        # Se a opção for -1, para após o primeiro
+        if [[ "$1" == "-1" ]]; then
+            echo "Alteração única realizada. A terminar."
+            exit 0
         fi
     fi
 done
