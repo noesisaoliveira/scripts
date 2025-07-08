@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuração
-ARTIFACTORY_URL="https://artifactory.jfrog.io/artifactory"
+ARTIFACTORY_URL="https://artifactory_url.jfrog.io/artifactory"
 
 # Verificar argumento
 if [[ "$1" != "-r" && "$1" != "-c" && "$1" != "-1" ]]; then
@@ -30,64 +30,56 @@ if [[ -z "$users" || "$users" == "[]" ]]; then
     exit 1
 fi
 
-# Ciclo entre cada user
+# Ciclo entre cada utilizador
 echo "$users" | jq -r '.[].name' | while read -r username; do
-    # Obter os detalhes do user
+    # Obter os detalhes do utilizador
     user_json=$(curl -s -u "$API_USER:$API_PASSWORD" "$ARTIFACTORY_URL/api/security/users/$username")
 
-    # Extração do email atual
+    # Extrai o email atual
     current_email=$(echo "$user_json" | jq -r '.email // empty')
 
-    # Se existir match com o mail configurado, processar
+    # Se for o email antigo, altera
     if [[ "$current_email" == "$OLD_EMAIL" ]]; then
-        echo "Encontrado utilizador para atualizar: $username"
-
-        # Dump JSON do user para debug
+        echo "🔍 Encontrado utilizador para atualizar: $username"
         echo "$user_json" > "user_dump_$username.json"
 
         if [[ "$1" == "-r" || "$1" == "-1" ]]; then
-            echo "A atualizar o email..."
+            echo "🔧 A atualizar o email..."
 
-            # Criar payload sem mexer em grupos se existirem
+            # Atualiza apenas os campos necessários
             updated_json=$(echo "$user_json" | jq --arg email "$NEW_EMAIL" --arg password "dummy" '
-            {
-              name: .name,
-              email: $email,
-              password: $password,
-              admin: (.admin // false),
-              disableUIAccess: (.disableUIAccess // false),
-              internalPasswordDisabled: (.internalPasswordDisabled // false),
-              profileUpdatable: false
-            }
-            + (if has("groups") then {groups: .groups} else {} end)')
+                .email = $email
+                | .password = $password
+                | .profileUpdatable = false
+            ')
 
             echo "Payload JSON enviado:"
-            echo "$updated_json" | jq
+            echo "$updated_json"
 
-            # Fazer PUT request e capturar a resposta completa
+            # Enviar o PUT
             response=$(curl -s -w "\n%{http_code}" -u "$API_USER:$API_PASSWORD" \
                 -H "Content-Type: application/json" \
                 -X PUT "$ARTIFACTORY_URL/api/security/users/$username" \
                 -d "$updated_json")
 
-            http_body=$(echo "$response" | head -n 1)
-            http_code=$(echo "$response" | tail -n1)
+            body=$(echo "$response" | head -n -1)
+            code=$(echo "$response" | tail -n1)
 
-            if [[ "$http_code" == "200" || "$http_code" == "201" ]]; then
-                echo "✅ Sucesso na atualização do email : $username"
+            if [[ "$code" == "200" || "$code" == "201" ]]; then
+                echo "Sucesso na atualização do email : $username"
                 echo "$(date '+%Y-%m-%d %H:%M:%S') - Atualizado: $username" >> "$LOG_FILE"
             else
-                echo "❌ Falha na atualização do email : $username (HTTP $http_code)"
+                echo "Falha na atualização do email : $username (HTTP $code)"
                 echo "Resposta do servidor:"
-                echo "$http_body"
-                echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $http_code) - $http_body" >> "$LOG_FILE"
+                echo "$body"
+                echo "$(date '+%Y-%m-%d %H:%M:%S') - Falha: $username (HTTP $code)" >> "$LOG_FILE"
             fi
+
         elif [[ "$1" == "-c" ]]; then
-            echo "Modo de verificação: o email do user $username vai ser alterado se executar o script com a flag -r."
+            echo "Modo de verificação: o email do utilizador $username vai ser alterado se executar o script com a flag -r."
             echo "$(date '+%Y-%m-%d %H:%M:%S') - Verificação: $username (email atual: $current_email)" >> "$LOG_FILE"
         fi
 
-        # Se a opção for -1, parar após o primeiro
         if [[ "$1" == "-1" ]]; then
             echo "Alteração única realizada. A terminar."
             exit 0
