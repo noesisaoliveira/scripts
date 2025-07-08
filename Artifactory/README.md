@@ -1,7 +1,7 @@
-# Script Name
+# Nome do Script
 bulk_change_email_users.sh
 
-# What it does?
+# O que faz?
 Este script tem como objetivo atualizar em massa o e-mail de utilizadores internos do Jfrog Artifactory.
 É necessário configurar o e-mail antigo e o novo, o script acede por API do Artifactory para verificar os utilizadores com o email antigo a alterar e atualiza-los com o novo e-mail.
 Este script também cria um arquivo de log com todas as atualizações e falhas.
