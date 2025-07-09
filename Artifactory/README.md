@@ -1,5 +1,5 @@
 # Nome do Script
-bulk_change_email_users.sh
+bulk_change_email_internal_artifactory_users.sh
 
 # O que faz?
 Este script tem como objetivo atualizar em massa o e-mail de utilizadores internos do Jfrog Artifactory.
@@ -30,5 +30,6 @@ chmod +x bulk_change_email_internal_users.sh
 
 # Logging
 Durante a execução é criado um ficheiro log no mesmo diretório com o nome: update_email_log_<data_hora>.log
+Durante a execução são criados os ficheiros json com o payload de cada user com o nome "user_dump_%%USERNAME%%.json" a alterar para debug se necessário
 
 São registados no log as atualizações bem-sucedidas e as falhas, apenas para os utilizadores cujo email é necessário alterar.
