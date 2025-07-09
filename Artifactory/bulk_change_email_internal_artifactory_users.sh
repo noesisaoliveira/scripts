@@ -24,7 +24,7 @@
 #        -r para executar o script e alterar em massa todos os users encontrados com o old email;
 #        -1 para executar o script e alterar apenas o primeiro match com o old_email, depois para a atualização.
 
-# Quando o script é executado, é perguntado ao utilizador o utilizador Artifactory com permissões para alteração dos emails e a respectiva password.
+# Quando o script é executado, é perguntado o utilizador Artifactory com permissões para alteração dos emails e a respectiva password.
 
 # Garantir permissões de execução neste script
 # chmod +x bulk_change_email_internal_users.sh
